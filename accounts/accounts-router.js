@@ -26,14 +26,19 @@ router.post('/', validatePost, (req, res) => {
 });
 
 router.put('/:id', validatePost, (req, res) => {
-	db('accounts')
+    db('accounts')
 		.where({id: req.params.id})
 		.update({name: req.body.name, budget: req.body.budget})
-		.then(accounts => {
-			res.status(200).json(accounts);
+		.then(count => {
+			if(count > 0) {
+                res.status(200).json({message: "updated successful"});
+            } else {
+                res.status(404).json({message: 'no posts by that id found'});
+            }
 		})
-		.catch(() => {
-			res.status(500).json({error: 'failed to update account'});
+		.catch((error) => {
+            console.log(error);
+            res.status(500).json({error});
 		});
 });
 
@@ -57,6 +62,7 @@ module.exports = router;
 // | budget | numeric          | required                                            |
 
 function validatePost(req, res, next) {
+    console.log(req.body)
 	!req.body.name
 		? res.status(400).json({error: 'Please include name'})
 		: !req.body.budget
